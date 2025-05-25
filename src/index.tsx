@@ -16,7 +16,7 @@ const domNode = document.getElementById('root') as HTMLDivElement;
 const root = createRoot(domNode);
 
 const App = () => {
-  const [isSidebarOpen, setSidebarOpen] = useState(false); // наше меню
+  // const [isSidebarOpen, setSidebarOpen] = useState(false); // наше меню
   const [displaySettings, setDisplaySettings] =
     useState<ArticleStateType>(defaultArticleState); // глобальные стили
 
@@ -33,9 +33,9 @@ const App = () => {
         } as React.CSSProperties
       }>
       <ArticleParamsForm
-        isOpen={isSidebarOpen}
-        onToggle={() => setSidebarOpen(!isSidebarOpen)}
-        onClose={() => setSidebarOpen(false)}
+        // isOpen={isSidebarOpen}
+        // onToggle={() => setSidebarOpen(!isSidebarOpen)}
+        // onClose={() => setSidebarOpen(false)}
         currentArticleState={displaySettings}
         setCurrentArticleState={setDisplaySettings}
       />

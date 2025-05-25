@@ -20,21 +20,19 @@ import { Separator } from 'src/ui/separator';
 
 // Добавляем тип для пропсов
 type ArticleParamsFormProps = {
-  isOpen: boolean;
-  onToggle: () => void;
-  onClose: () => void;
+  // isOpen: boolean;
+  // onToggle: () => void;
+  // onClose: () => void;
   currentArticleState: ArticleStateType;
   setCurrentArticleState: (newState: ArticleStateType) => void;
 };
 
 export const ArticleParamsForm = ({
-  isOpen,
-  onToggle,
-  onClose,
   currentArticleState,
   setCurrentArticleState,
 }: ArticleParamsFormProps) => {
   // Локальное состояние для редактирования
+  const [isOpen, setOpen] = useState(false);
   const [localSettings, setLocalSettings] =
     useState<ArticleStateType>(currentArticleState);
 
@@ -47,7 +45,7 @@ export const ArticleParamsForm = ({
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        setOpen(false);
       }
     };
 
@@ -55,8 +53,31 @@ export const ArticleParamsForm = ({
     return () => {
       document.removeEventListener('keydown', handleEsc); //не забываем ремувить за собой
     };
-  }, [onClose]);
+  }, []);
 
+  //долгая попытка настройки оверлея...ааа
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClick = (e: Event) => {
+      const mouseEvent = e as MouseEvent;
+      const container = document.querySelector(`.${styles.container}`);
+      if (container && !container.contains(mouseEvent.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    const overlay = document.querySelector(`.${styles.overlay}`);
+    if (overlay) {
+      overlay.addEventListener('click', handleClick);
+    }
+
+    return () => {
+      if (overlay) {
+        overlay.removeEventListener('click', handleClick);
+      }
+    };
+  }, [isOpen]);
   // Универсальный обработчик
   // (функция, которая обновляет любую часть коробки с настроками)
   const updateLocal =
@@ -67,19 +88,19 @@ export const ArticleParamsForm = ({
 
   const handleApply = () => {
     setCurrentArticleState(localSettings);
-    onClose();
+    setOpen(false);
   };
 
   const handleReset = () => {
     setLocalSettings(defaultArticleState);
     setCurrentArticleState(defaultArticleState);
-    onClose();
+    setOpen(false);
   };
   return (
     <>
       {/* Стрелка-кнопка управляет состоянием меню */}
-      <ArrowButton isOpen={isOpen} onClick={onToggle} />
-      <div className={styles.overlay} onClick={onClose}>
+      <ArrowButton isOpen={isOpen} onClick={() => setOpen(!isOpen)} />
+      <div className={styles.overlay}>
         <aside
           className={clsx(styles.container, {
             [styles.container_open]: isOpen,
@@ -87,9 +108,12 @@ export const ArticleParamsForm = ({
           onClick={(e) => e.stopPropagation()}>
           {/* предотвращает закрытие при клике по aside */}
 
-          <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
-            {/* предотвращает обновление при клике по кнопке */}
-
+          <form
+            className={styles.form}
+            onSubmit={(e) => {
+              e.preventDefault(); // предотвращает обновление при клике по кнопке
+              handleApply(); //обработка submit перенесена на form
+            }}>
             {/* настройки */}
             <Text size={31} weight={800} family='open-sans' uppercase>
               Задайте параметры
@@ -138,23 +162,9 @@ export const ArticleParamsForm = ({
                 title='Сбросить'
                 htmlType='reset'
                 type='clear'
-                // onClick={() => {
-                // 	setLocalSettings(defaultArticleState); // сбрасываем форму
-                // 	setCurrentArticleState(defaultArticleState); // применяем ко всей странице
-                // 	onClose(); // закрываем
-                // }}
                 onClick={handleReset}
               />
-              <Button
-                title='Применить'
-                htmlType='submit'
-                type='apply'
-                onClick={handleApply}
-                // onClick={() => {
-                // 	setCurrentArticleState(localSettings);
-                // 	onClose(); // закрываем настройки
-                // }}
-              />
+              <Button title='Применить' htmlType='submit' type='apply' />
             </div>
           </form>
         </aside>
