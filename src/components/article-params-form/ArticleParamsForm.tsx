@@ -32,7 +32,7 @@ export const ArticleParamsForm = ({
   setCurrentArticleState,
 }: ArticleParamsFormProps) => {
   // Локальное состояние для редактирования
-  const [isOpen, setOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [localSettings, setLocalSettings] =
     useState<ArticleStateType>(currentArticleState);
 
@@ -45,7 +45,7 @@ export const ArticleParamsForm = ({
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setOpen(false);
+        setIsMenuOpen(false);
       }
     };
 
@@ -57,13 +57,13 @@ export const ArticleParamsForm = ({
 
   //долгая попытка настройки оверлея...ааа
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isMenuOpen) return;
 
     const handleClick = (e: Event) => {
       const mouseEvent = e as MouseEvent;
       const container = document.querySelector(`.${styles.container}`);
       if (container && !container.contains(mouseEvent.target as Node)) {
-        setOpen(false);
+        setIsMenuOpen(false);
       }
     };
 
@@ -77,7 +77,7 @@ export const ArticleParamsForm = ({
         overlay.removeEventListener('click', handleClick);
       }
     };
-  }, [isOpen]);
+  }, [isMenuOpen]);
   // Универсальный обработчик
   // (функция, которая обновляет любую часть коробки с настроками)
   const updateLocal =
@@ -88,22 +88,25 @@ export const ArticleParamsForm = ({
 
   const handleApply = () => {
     setCurrentArticleState(localSettings);
-    setOpen(false);
+    setIsMenuOpen(false);
   };
 
   const handleReset = () => {
     setLocalSettings(defaultArticleState);
     setCurrentArticleState(defaultArticleState);
-    setOpen(false);
+    setIsMenuOpen(false);
   };
   return (
     <>
       {/* Стрелка-кнопка управляет состоянием меню */}
-      <ArrowButton isOpen={isOpen} onClick={() => setOpen(!isOpen)} />
+      <ArrowButton
+        isOpen={isMenuOpen}
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+      />
       <div className={styles.overlay}>
         <aside
           className={clsx(styles.container, {
-            [styles.container_open]: isOpen,
+            [styles.container_open]: isMenuOpen,
           })}
           onClick={(e) => e.stopPropagation()}>
           {/* предотвращает закрытие при клике по aside */}
